@@ -24,6 +24,28 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password', 'remember_token', 'profile_data', 'profile_private_key', 'subscription'
     ];
+
+    /**
+     * Get the subscription for this user.
+     */
+    public function subscription()
+    {
+        return $this->belongsTo('App\Subscription');
+    }
+
+    /**
+     * Override save() to ensure users have a subscription and profile data
+     *
+     * @param array $options
+     * @return bool
+     */
+    public function save(array $options = [])
+    {
+        if (!$this->profile_data) $this->profile_data = '';
+        if (!$this->profile_private_key) $this->profile_private_key = '';
+        if (!$this->subscription_id) $this->subscription_id = Subscription::where('is_default', true)->first()->id;
+        parent::save($options);
+    }
 }

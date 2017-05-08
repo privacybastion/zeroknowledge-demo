@@ -6,9 +6,9 @@
         <div class="col-md-8 col-md-offset-2">
             <div class="panel panel-default">
                 <div class="panel-heading">Dashboard</div>
-
                 <div class="panel-body">
-                    You are logged in!
+                    <p>You are logged in and are on the {{ Auth::user()->subscription->name }} plan.</p>
+                    <p>This gives you access to {{ Auth::user()->subscription->accounts_max }} accounts.</p>
                 </div>
             </div>
         </div>
