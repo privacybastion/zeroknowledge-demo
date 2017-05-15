@@ -24,7 +24,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token', 'profile_data', 'profile_private_key', 'subscription'
+        'password', 'remember_token', 'profile_data', 'profile_private_key', 'subscription_id'
     ];
 
     /**
@@ -45,6 +45,7 @@ class User extends Authenticatable
     {
         if (!$this->profile_data) $this->profile_data = '';
         if (!$this->profile_private_key) $this->profile_private_key = '';
+        if (!$this->profile_public_key) $this->profile_public_key = '';
         if (!$this->subscription_id) $this->subscription_id = Subscription::where('is_default', true)->first()->id;
         parent::save($options);
     }

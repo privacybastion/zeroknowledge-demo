@@ -16,6 +16,7 @@ class ExtendUsersTable extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->text('profile_data');
             $table->text('profile_private_key');
+            $table->text('profile_public_key');
             $table->integer('subscription_id');
         });
     }
