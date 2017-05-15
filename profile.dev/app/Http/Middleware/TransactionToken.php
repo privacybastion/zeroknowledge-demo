@@ -27,7 +27,6 @@ class TransactionToken
             $res = $client->request('POST', $endpoint, ['headers' => $headers, 'json' => $content]);
             $res = json_decode($res->getBody()->getContents(), true);
 
-            echo "setting transaction_token\n";
             session(['transaction_token' => $res['token']]);
         }
 
