@@ -9,6 +9,15 @@
                 <div class="panel-body">
                     <p>You are logged in and are on the {{ Auth::user()->subscription->name }} plan.</p>
                     <p>This gives you access to {{ Auth::user()->subscription->accounts_max }} accounts.</p>
+                    <p>Your token for the transaction server is {{ session('transaction_token') }}.</p>
+                    <p>Your Profile Data is:</p>
+                    <pre>
+                        {{ Auth::user()->subscription->profile_data }}
+                    </pre>
+                    <p>Your Private Key for Public Profile data is:</p>
+                    <pre>
+                        {{ Auth::user()->subscription->profile_private_key }}
+                    </pre>
                 </div>
             </div>
         </div>
