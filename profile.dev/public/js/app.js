@@ -4060,7 +4060,87 @@ $(document).ready(function () {
 
     $.get('/api/user').done(function (user_data) {
         checkPublicKey(user_data);
-    }).fail(function (user_data) {});
+    });
+
+    function checkPublicKey(user_data) {
+
+        // Does the user have a profile keypair yet?
+        if (user_data.profile_private_key == '') {
+
+            // No keypair - create one using the user's login password
+            asyncCreateKeyPair({ passphrase: sessionStorage.getItem('password') }).done(function (profile_key) {
+
+                // Save new keypair to user profile
+                $.post('/api/user', {
+                    profile_private_key: profile_key.private_key,
+                    profile_public_key: profile_key.public_key
+                }).done(function (user_data) {
+                    checkPrivateData(user_data);
+                });
+            });
+        } else {
+            checkPrivateData(user_data);
+        }
+    }
+
+    function checkPrivateData(user_data) {
+
+        // Does the user have profile_data yet?
+        if (user_data.profile_data == '') {
+
+            // User needs profile data, which comprises a keypair for transaction data
+
+            // User will be prompted for a secure passphrase
+            var promptText = "Please provide a secure passphrase for your transaction data.\n" + "\n" + "This must be different to the password used to log in to your profile.";
+
+            // Create the keypair for transaction data
+            asyncCreateKeyPair({ promptText: promptText }).done(function (transaction_key) {
+
+                // Encrypt the data using the profile key
+                var profile_data = {
+                    account_references: [1, 3, 5],
+                    transaction_private_key: transaction_key.private_key,
+                    transaction_public_key: transaction_key.public_key
+                };
+
+                asyncEncrypt(profile_data, user_data.profile_public_key).done(function (ciphertext) {
+
+                    // Save the encrypted profile data to the user profile
+                    $.post('/api/user', {
+                        profile_data: ciphertext.data
+                    }).done(function (user_data) {
+                        startApp(user_data);
+                    });
+                });
+            });
+        } else {
+            startApp(user_data);
+        }
+    }
+
+    function startApp(user_data) {
+
+        // Decrypt the profile data
+        getAccountReferences(user_data).done(function (val) {
+            console.log(val);
+
+            var account_references = val.account_references;
+
+            $('#js-panel .panel-body').html('');
+            for (var account_ptr = 0; account_ptr < account_references.length; account_ptr++) {
+                $('#js-panel .panel-body').append('<p>' + account_references[account_ptr] + '</p>');
+            }
+
+            $('#js-panel .panel-body').append('<hr/>');
+            $('#js-panel .panel-body').append('<button id="new-account">Crate new account</button>');
+
+            $('#new-account').click(function (e) {
+                $.post('http://transaction.dev/api/v1/accounts').done(function (a) {
+                    console.log(a);
+                });
+            });
+        });
+    }
 
     function asyncCreateKeyPair(options) {
         var d = $.Deferred();
@@ -4106,50 +4186,6 @@ $(document).ready(function () {
         return d.promise();
     }
 
-    function checkPublicKey(user_data) {
-        if (user_data.profile_private_key == '') {
-
-            asyncCreateKeyPair({ passphrase: "" }).done(function (profile_key) {
-                $.post('/api/user', {
-                    profile_private_key: profile_key.private_key,
-                    profile_public_key: profile_key.public_key
-                }).done(function (user_data) {
-                    checkPrivateData(user_data);
-                });
-            });
-        } else {
-            checkPrivateData(user_data);
-        }
-    }
-
-    function checkPrivateData(user_data) {
-        if (user_data.profile_data == '') {
-
-            var promptText = "Please provide a password for your transaction data.\n" + "\n" + "This must be different to the password used to log in to your profile.";
-
-            asyncCreateKeyPair({ promptText: promptText }).done(function (transaction_key) {
-                var profile_data = {
-                    account_references: [1, 3, 5],
-                    transaction_private_key: transaction_key.private_key,
-                    transaction_public_key: transaction_key.public_key
-                };
-
-                asyncEncrypt(profile_data, user_data.profile_public_key).done(function (ciphertext) {
-
-                    var profile_data = ciphertext.data;
-
-                    $.post('/api/user', {
-                        profile_data: profile_data
-                    }).done(function (user_data) {
-                        startApp(user_data);
-                    });
-                });
-            });
-        } else {
-            startApp(user_data);
-        }
-    }
-
     function getAccountReferences(user_data) {
 
         var d = $.Deferred();
@@ -4172,29 +4208,6 @@ $(document).ready(function () {
         });
 
         return d.promise();
-    }
-
-    function startApp(user_data) {
-
-        getAccountReferences(user_data).done(function (val) {
-            console.log(val);
-
-            var account_references = val.account_references;
-
-            $('#js-panel .panel-body').html('');
-            for (var account_ptr = 0; account_ptr < account_references.length; account_ptr++) {
-                $('#js-panel .panel-body').append('<p>' + account_references[account_ptr] + '</p>');
-            }
-
-            $('#js-panel .panel-body').append('<hr/>');
-            $('#js-panel .panel-body').append('<button id="new-account">Crate new account</button>');
-
-            $('#new-account').click(function (e) {
-                $.post('http://transaction.dev/api/v1/accounts').done(function (a) {
-                    console.log(a);
-                });
-            });
-        });
     }
 });
 
