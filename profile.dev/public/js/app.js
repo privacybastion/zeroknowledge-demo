@@ -4047,8 +4047,9 @@ $(document).ready(function () {
         var salt = ($('#email', e.target).val() + "#cihgmalgbakneismcoidf").substring(0, 22);
         salt = "$2y$10$" + salt;
 
-        // Grab password, then blank the box
+        // Grab password, save to session storage, then blank the input field
         var password = $('#password', e.target).val();
+        sessionStorage.setItem('password', password);
         $('#password', e.target).val('');
 
         // Crypt and set bcrypt field
@@ -4158,7 +4159,7 @@ $(document).ready(function () {
         var openpgp = __webpack_require__(51);
 
         var privKeyObj = openpgp.key.readArmored(user_data.profile_private_key).keys[0];
-        privKeyObj.decrypt("");
+        privKeyObj.decrypt(sessionStorage.getItem('password'));
 
         var options = {
             message: openpgp.message.readArmored(user_data.profile_data),
