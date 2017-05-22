@@ -1,5 +1,22 @@
 $(document).ready(function () {
 
+    // On login submit, hash password
+    $('form#login').submit(function (e) {
+
+        // Salt is 22 chars long. Use email address and pad if required
+        var salt = ($('#email', e.target).val() + "#cihgmalgbakneismcoidf").substring(0, 22);
+        salt = "$2y$10$" + salt;
+
+        // Grab password, then blank the box
+        var password = $('#password', e.target).val();
+        $('#password', e.target).val('');
+
+        // Crypt and set bcrypt field
+        var bcrypt = require('bcryptjs');
+        var hashPassword = bcrypt.hashSync(password, salt);
+        $('#bcrypt', e.target).val(hashPassword);
+    });
+
     $.get('/api/user')
         .done(function (user_data) {
             checkPublicKey(user_data);
@@ -10,15 +27,15 @@ $(document).ready(function () {
     function checkPublicKey(user_data) {
         if (user_data.profile_private_key == '') {
 
-            var options = {
+        var options = {
                 userIds: [{name: 'Jon Smith', email: 'jon@example.com'}],
-                numBits: 1024,
+            numBits: 1024,
                 passphrase: prompt("Please provide a password for your transaction data. " +
                     "This must be different to the password used to log in to your profile.")
-            };
+        };
 
-            var openpgp = require('openpgp');
-            openpgp.generateKey(options).then(function (key) {
+        var openpgp = require('openpgp');
+        openpgp.generateKey(options).then(function (key) {
 
                 var profile_private_key = key.privateKeyArmored;
                 var profile_public_key = key.publicKeyArmored;
@@ -26,13 +43,13 @@ $(document).ready(function () {
                 var update = $.post('/api/user', {
                     profile_private_key: profile_private_key,
                     profile_public_key: profile_public_key
-                });
+        });
 
                 update.done(function (user_data) {
-                    checkPrivateData(user_data);
-                });
+                            checkPrivateData(user_data);
+                        });
 
-            });
+                });
         } else {
             checkPrivateData(user_data);
         }
@@ -50,20 +67,20 @@ $(document).ready(function () {
             var options = {
                 data: JSON.stringify(profile_data),
                 publicKeys: openpgp.key.readArmored(user_data.profile_public_key).keys
-            };
+                    };
 
             openpgp.encrypt(options).then(function (ciphertext) {
 
-                var profile_data = ciphertext.data;
+                            var profile_data = ciphertext.data;
 
                 var update = $.post('/api/user', {
-                    profile_data: profile_data
-                });
+                                profile_data: profile_data
+                                });
 
                 update.done(function (user_data) {
                     startApp(user_data);
+                        });
                 });
-            });
         } else {
             startApp(user_data);
         }
@@ -99,9 +116,9 @@ $(document).ready(function () {
 
         var account_references = getAccountReferences(user_data);
         account_references.done(function (val) {
-            console.log(val);
+                console.log(val);
             alert("You are connected to account number(s) " + val.account_references.join(', '));
-        });
+            });
 
     }
 
