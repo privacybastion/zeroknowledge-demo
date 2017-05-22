@@ -1,5 +1,10 @@
 $(document).ready(function () {
 
+    // Some form elements are trimmed on change
+    $('input#email').change(function (e) {
+        e.target.value = e.target.value.trim();
+    });
+
     // On login submit, hash password
     $('form#login').submit(function (e) {
 
@@ -24,32 +29,65 @@ $(document).ready(function () {
         .fail(function (user_data) {
         });
 
-    function checkPublicKey(user_data) {
-        if (user_data.profile_private_key == '') {
+    function asyncCreateKeyPair(options) {
+        var d = $.Deferred();
+
+        var passphrase;
+        if (!options.passphrase && options.passphrase != '') {
+            var promptText = options.promptText || "Please provide a password";
+            passphrase = prompt(promptText);
+        }
 
         var options = {
-                userIds: [{name: 'Jon Smith', email: 'jon@example.com'}],
+            userIds: [{}],
             numBits: 1024,
-                passphrase: prompt("Please provide a password for your transaction data. " +
-                    "This must be different to the password used to log in to your profile.")
+            passphrase: passphrase
         };
 
         var openpgp = require('openpgp');
         openpgp.generateKey(options).then(function (key) {
-
-                var profile_private_key = key.privateKeyArmored;
-                var profile_public_key = key.publicKeyArmored;
-
-                var update = $.post('/api/user', {
-                    profile_private_key: profile_private_key,
-                    profile_public_key: profile_public_key
+            d.resolve({
+                private_key: key.privateKeyArmored,
+                public_key: key.publicKeyArmored
+            });
         });
 
-                update.done(function (user_data) {
+        return d.promise()
+    }
+
+    function asyncEncrypt(data, public_key) {
+
+        var d = $.Deferred();
+
+        var openpgp = require('openpgp');
+
+        var options = {
+            data: JSON.stringify(data),
+            publicKeys: openpgp.key.readArmored(public_key).keys
+        };
+
+        openpgp.encrypt(options).then(function (ciphertext) {
+            d.resolve(ciphertext);
+        });
+
+        return d.promise();
+
+    }
+
+    function checkPublicKey(user_data) {
+        if (user_data.profile_private_key == '') {
+
+            asyncCreateKeyPair({passphrase: ""})
+                .done(function (profile_key) {
+                    $.post('/api/user', {
+                        profile_private_key: profile_key.private_key,
+                        profile_public_key: profile_key.public_key
+                    })
+                        .done(function (user_data) {
                             checkPrivateData(user_data);
                         });
-
                 });
+
         } else {
             checkPrivateData(user_data);
         }
@@ -58,29 +96,34 @@ $(document).ready(function () {
     function checkPrivateData(user_data) {
         if (user_data.profile_data == '') {
 
-            var profile_data = {
-                account_references: []
-            };
+            var promptText = "Please provide a password for your transaction data.\n" +
+                "\n" +
+                "This must be different to the password used to log in to your profile.";
 
-            var openpgp = require('openpgp');
-
-            var options = {
-                data: JSON.stringify(profile_data),
-                publicKeys: openpgp.key.readArmored(user_data.profile_public_key).keys
+            asyncCreateKeyPair({promptText: promptText})
+                .done(function (transaction_key) {
+                    var profile_data = {
+                        account_references: [1, 3, 5],
+                        transaction_private_key: transaction_key.private_key,
+                        transaction_public_key: transaction_key.public_key
                     };
 
-            openpgp.encrypt(options).then(function (ciphertext) {
+                    asyncEncrypt(profile_data, user_data.profile_public_key)
+                        .done(function (ciphertext) {
 
                             var profile_data = ciphertext.data;
 
-                var update = $.post('/api/user', {
+                            $.post('/api/user', {
                                 profile_data: profile_data
+                            })
+                                .done(function (user_data) {
+                                    startApp(user_data);
                                 });
 
-                update.done(function (user_data) {
-                    startApp(user_data);
                         });
+
                 });
+
         } else {
             startApp(user_data);
         }
@@ -90,13 +133,12 @@ $(document).ready(function () {
 
         var d = $.Deferred();
 
+        $('.panel').parent().append('<div class="panel panel-default" id="js-panel"><div class="panel-heading">Accounts</div><div class="panel-body"><p>Loading Account Information</p></div></div>');
+
         var openpgp = require('openpgp');
 
-        var passphrase = prompt("Please provide your password so we can unlock your transaction data. " +
-            "This is different to the password used to log in to your profile.");
-
         var privKeyObj = openpgp.key.readArmored(user_data.profile_private_key).keys[0];
-        privKeyObj.decrypt(passphrase);
+        privKeyObj.decrypt("");
 
         var options = {
             message: openpgp.message.readArmored(user_data.profile_data),
@@ -105,7 +147,6 @@ $(document).ready(function () {
         };
 
         openpgp.decrypt(options).then(function (plaintext) {
-            console.log('DONE');
             d.resolve(JSON.parse(plaintext.data));
         });
 
@@ -114,10 +155,27 @@ $(document).ready(function () {
 
     function startApp(user_data) {
 
-        var account_references = getAccountReferences(user_data);
-        account_references.done(function (val) {
+        getAccountReferences(user_data)
+            .done(function (val) {
                 console.log(val);
-            alert("You are connected to account number(s) " + val.account_references.join(', '));
+
+                var account_references = val.account_references;
+
+                $('#js-panel .panel-body').html('');
+                for (var account_ptr = 0; account_ptr < account_references.length; account_ptr++) {
+                    $('#js-panel .panel-body').append('<p>' + account_references[account_ptr] + '</p>');
+                }
+
+                $('#js-panel .panel-body').append('<hr/>');
+                $('#js-panel .panel-body').append('<button id="new-account">Crate new account</button>');
+
+                $('#new-account').click(function (e) {
+                    $.post('http://transaction.dev/api/v1/accounts')
+                        .done(function (a) {
+                            console.log(a);
+                        });
+                });
+
             });
 
     }
