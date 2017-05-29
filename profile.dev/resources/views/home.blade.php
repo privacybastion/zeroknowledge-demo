@@ -19,6 +19,9 @@
                     <p>Your Profile Data is:</p>
                     <pre>{{ Auth::user()->profile_data }}</pre>
 
+                    <p>Your Public Key for Public Profile data is:</p>
+                    <pre>{{ Auth::user()->profile_public_key }}</pre>
+
                     <p>Your Private Key for Public Profile data is:</p>
                     <pre>{{ Auth::user()->profile_private_key }}</pre>
 
