@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class Account extends Model
 {
-    protected $fillable = ['public_keys', 'name'];
+    protected $fillable = ['public_key'];
 }
