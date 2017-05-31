@@ -18,6 +18,10 @@
         window.Laravel = {!! json_encode([
             'csrfToken' => csrf_token(),
         ]) !!};
+        window.PrivacyBastion = {!! json_encode([
+            'transactionToken' => session('transaction_token'),
+        ])
+        !!}
     </script>
 </head>
 <body>
