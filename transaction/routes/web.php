@@ -14,3 +14,4 @@
 Route::get('/', function () {
     return Redirect::to('http://profile.dev');
 });
+Route::get('/data', 'DataController@index');
