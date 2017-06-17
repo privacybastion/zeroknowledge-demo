@@ -21,8 +21,8 @@ Route::group([
     'prefix' => 'v1',
     'middleware' => 'auth.bearer',
 ], function () {
-    Route::post('/session', 'SessionController@store');
+    Route::post('session', 'SessionController@store');
 
-    Route::post('/accounts', 'AccountController@store');
+    Route::post('accounts', 'AccountController@store');
 });
 
