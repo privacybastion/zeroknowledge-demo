@@ -30,6 +30,7 @@ class BearerToken
             }
 
             if($token = Token::where('token', $authValue)->first()) {
+                $request->attributes->add(['token' => $token]);
                 return $next($request);
             }
         }
