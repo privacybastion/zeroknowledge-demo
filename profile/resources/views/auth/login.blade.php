@@ -14,10 +14,11 @@
                             <label for="email" class="col-md-4 control-label">E-Mail Address</label>
 
                             <div class="col-md-6">
-                                <input id="email" type="email" class="form-control" name="email" value="{{ old('email') }}" required autofocus>
+                                <input id="email" type="email" class="form-control" name="email"
+                                       value="{{ old('email') }}" required autofocus autocomplete="off">
 
                                 @if ($errors->has('email'))
-                                    <span class="help-block">
+                                <span class="help-block">
                                         <strong>{{ $errors->first('email') }}</strong>
                                     </span>
                                 @endif
@@ -28,7 +29,7 @@
                             <label for="password" class="col-md-4 control-label">Password</label>
 
                             <div class="col-md-6">
-                                <input id="password" type="text" class="form-control" required>
+                                <input id="password" type="text" class="form-control" required autocomplete="off">
 
                                 @if ($errors->has('password'))
                                 <span class="help-block">
@@ -42,13 +43,7 @@
                             <label for="bcrypt" class="col-md-4 control-label">Bcrypt</label>
 
                             <div class="col-md-6">
-                                <input id="bcrypt" type="text" name="password">
-
-                                @if ($errors->has('password'))
-                                <span class="help-block">
-                                        <strong>{{ $errors->first('password') }}</strong>
-                                    </span>
-                                @endif
+                                <input id="bcrypt" type="text" class="form-control" name="password" autocomplete="off">
                             </div>
                         </div>
 
@@ -56,7 +51,8 @@
                             <div class="col-md-6 col-md-offset-4">
                                 <div class="checkbox">
                                     <label>
-                                        <input type="checkbox" name="remember" {{ old('remember') ? 'checked' : '' }}> Remember Me
+                                        <input type="checkbox" name="remember" {{ old('remember') ? 'checked' : '' }}>
+                                        Remember Me
                                     </label>
                                 </div>
                             </div>
