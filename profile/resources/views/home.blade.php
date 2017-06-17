@@ -27,6 +27,12 @@
 
                 </div>
             </div>
+
+            <div class="panel panel-default" id="accounts-panel">
+                <div class="panel-heading">Accounts</div>
+                <div class="panel-body"></div>
+            </div>
+
         </div>
     </div>
 </div>

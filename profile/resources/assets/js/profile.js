@@ -181,17 +181,17 @@ $(document).ready(function () {
 
         var $this = this;
 
-        $("#js-panel .panel-body").html("");
+        $("#accounts-panel .panel-body").html("");
         for (var account_ptr = 0; account_ptr < $this.user_data.profile_data.account_references.length; account_ptr++) {
-            $("#js-panel .panel-body").append("<p>" + $this.user_data.profile_data.account_references[account_ptr] + "</p>");
+            $("#accounts-panel .panel-body").append("<p>" + $this.user_data.profile_data.account_references[account_ptr] + "</p>");
         }
-        $("#js-panel .panel-body").append("<hr/>");
-        $("#js-panel .panel-body").append('<button id="new-account">Create new account</button>');
+        $("#accounts-panel .panel-body").append("<hr/>");
+        $("#accounts-panel .panel-body").append('<button id="new-account">Create new account</button>');
 
 
         $("#new-account").click(function (e) {
 
-            $("#js-panel .panel-body").html("<p>Loading Account Information</p>");
+            $("#accounts-panel .panel-body").html("<p>Loading Account Information</p>");
 
             $.ajax({
                 url: "http://transaction.example/api/v1/accounts",
@@ -295,13 +295,6 @@ $(document).ready(function () {
         });
         return d.promise();
     };
-
-    $(".panel").parent().append(
-        '<div class="panel panel-default" id="js-panel">' +
-        '<div class="panel-heading">Accounts</div>' +
-        '<div class="panel-body"></div>' +
-        '</div>'
-    );
 
     PB_Profile.loginHook();
     if ($("#accounts-panel").length !== 0) {
