@@ -10,20 +10,12 @@
 
                     <p>
                         You are logged in and are on the <strong>{{ Auth::user()->subscription->name }}</strong> plan.
-                        This gives you access to <strong>{{ Auth::user()->subscription->accounts_max }}</strong> accounts.
+                        This gives you access to <strong>{{ Auth::user()->subscription->accounts_max }}</strong>
+                        accounts.
                     </p>
 
                     <p>Your token for the transaction server is:</p>
                     <pre>{{ session('transaction_token') }}</pre>
-
-                    <p>Your Profile Data is:</p>
-                    <pre>{{ Auth::user()->profile_data }}</pre>
-
-                    <p>Your Public Key for Public Profile data is:</p>
-                    <pre>{{ Auth::user()->profile_public_key }}</pre>
-
-                    <p>Your Private Key for Public Profile data is:</p>
-                    <pre>{{ Auth::user()->profile_private_key }}</pre>
 
                 </div>
             </div>
