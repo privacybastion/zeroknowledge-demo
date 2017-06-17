@@ -58,11 +58,11 @@ $(document).ready(function () {
         $.ajax({
             url: "/api/user",
             type: "GET",
-            context: $this
+            context: this
 
         }).done(function (user_data) {
-            $this.user_data = user_data;
-            $this.checkPublicKey();
+            this.user_data = user_data;
+            this.checkPublicKey();
 
         });
 
@@ -218,7 +218,6 @@ $(document).ready(function () {
                     // Add this new account number to the list of accounts in the profile data
                     var profile_data = $this.user_data.profile_data;
                     profile_data.account_references.push(account.id);
-                    console.log(profile_data);
 
                     $this.asyncEncrypt(
                         profile_data,
