@@ -5,16 +5,13 @@ $(document).ready(function () {
 
     PB_Profile.user_data = {};
 
-    PB_Profile.init = function () {
-
-        var $this = this;
+    PB_Profile.loginHook = function () {
 
         // On login submit, hash password
         $("form#login").submit(function (e) {
 
             // Grab password, save to session storage, then blank the input field
             var password = $("#password", e.target).val();
-            console.log('Got password ' + password);
             sessionStorage.setItem("password", password);
             $("#password", e.target).val("");
 
@@ -27,6 +24,35 @@ $(document).ready(function () {
             var hashPassword = bcrypt.hashSync(password, salt);
             $("#bcrypt", e.target).val(hashPassword);
         });
+
+        // On register submit, hash passwords
+        $("form#register").submit(function (e) {
+
+            // Grab passwords, save to session storage, then blank the input fields
+            var password = $("#password", e.target).val();
+            var passwordConfirm = $("#password-confirm", e.target).val();
+            sessionStorage.setItem("password", password);
+            $("#password", e.target).val("");
+            $("#password-confirm", e.target).val("");
+
+            // Salt is 22 chars long. Use email address and pad if required
+            var salt = ($("#email", e.target).val() + "#cihgmalgbakneismcoidf").substring(0, 22);
+            salt = "$2y$10$" + salt;
+
+            // Crypt and set bcrypt field
+            var bcrypt = require("bcryptjs");
+            $("#bcrypt", e.target).val(bcrypt.hashSync(password, salt));
+            $("#bcrypt-confirm", e.target).val(bcrypt.hashSync(passwordConfirm, salt));
+
+        });
+
+        $("#logout-form").submit(function (e) {
+            sessionStorage.removeItem("password");
+        });
+
+    };
+
+    PB_Profile.init = function () {
 
         // Get this user's profile data and check it has a public key (new users don't).
         $.ajax({
@@ -187,7 +213,7 @@ $(document).ready(function () {
 
                 $this = this;
 
-                if(account.hasOwnProperty('id') && account.id != null) {
+                if (account.hasOwnProperty('id') && account.id != null) {
 
                     // Add this new account number to the list of accounts in the profile data
                     var profile_data = $this.user_data.profile_data;
@@ -277,5 +303,8 @@ $(document).ready(function () {
         '</div>'
     );
 
-    PB_Profile.init();
+    PB_Profile.loginHook();
+    if ($("#accounts-panel").length !== 0) {
+        PB_Profile.init();
+    }
 });
