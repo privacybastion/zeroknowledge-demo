@@ -7,7 +7,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading">Register</div>
                 <div class="panel-body">
-                    <form class="form-horizontal" role="form" method="POST" action="{{ route('register') }}">
+                    <form class="form-horizontal" id="register" role="form" method="POST" action="{{ route('register') }}">
                         {{ csrf_field() }}
 
                         <div class="form-group{{ $errors->has('name') ? ' has-error' : '' }}">
@@ -57,6 +57,22 @@
 
                             <div class="col-md-6">
                                 <input id="password-confirm" class="form-control" autocomplete="off">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="bcrypt" class="col-md-4 control-label">Bcrypt</label>
+
+                            <div class="col-md-6">
+                                <input id="bcrypt" class="form-control" name="password" autocomplete="off">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="bcrypt-confirm" class="col-md-4 control-label">Confirm Bcrypt</label>
+
+                            <div class="col-md-6">
+                                <input id="bcrypt-confirm" class="form-control" name="password_confirmation" autocomplete="off">
                             </div>
                         </div>
 
