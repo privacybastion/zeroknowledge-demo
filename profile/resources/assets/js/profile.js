@@ -5,25 +5,15 @@ $(document).ready(function () {
 
     PB_Profile.user_data = {};
 
-    PB_Profile.loginHook = function () {
 
-        // On login submit, hash password
-        $("form#login").submit(function (e) {
 
-            // Grab password, save to session storage, then blank the input field
-            var password = $("#password", e.target).val();
-            sessionStorage.setItem("password", password);
-            $("#password", e.target).val("");
 
-            // Salt is 22 chars long. Use email address and pad if required
-            var salt = ($("#email", e.target).val() + "#cihgmalgbakneismcoidf").substring(0, 22);
-            salt = "$2y$10$" + salt;
 
-            // Crypt and set bcrypt field
-            var bcrypt = require("bcryptjs");
-            var hashPassword = bcrypt.hashSync(password, salt);
-            $("#bcrypt", e.target).val(hashPassword);
-        });
+
+
+    PB_Profile.authHook = function () {
+
+
 
         // On register submit, hash passwords
         $("form#register").submit(function (e) {
@@ -36,7 +26,7 @@ $(document).ready(function () {
             $("#password-confirm", e.target).val("");
 
             // Salt is 22 chars long. Use email address and pad if required
-            var salt = ($("#email", e.target).val() + "#cihgmalgbakneismcoidf").substring(0, 22);
+            var salt = ($("#email", e.target).val().replace(/[^\.,\/A-Za-z]/g, '') + "D0nGmAL4Ba78Ei2MCo4uDf").substring(0, 22);
             salt = "$2y$10$" + salt;
 
             // Crypt and set bcrypt field
@@ -46,11 +36,39 @@ $(document).ready(function () {
 
         });
 
+
+
+        // On login submit, hash password
+        $("form#login").submit(function (e) {
+
+            // Grab password, save to session storage, then blank the input field
+            var password = $("#password", e.target).val();
+            sessionStorage.setItem("password", password);
+            $("#password", e.target).val("");
+
+            // Salt is 22 chars long. Use email address and pad if required
+            var salt = ($("#email", e.target).val().replace(/[^\.,\/A-Za-z]/g, '') + "D0nGmAL4Ba78Ei2MCo4uDf").substring(0, 22);
+            salt = "$2y$10$" + salt;
+
+            // Crypt and set bcrypt field
+            var bcrypt = require("bcryptjs");
+            var hashPassword = bcrypt.hashSync(password, salt);
+            $("#bcrypt", e.target).val(hashPassword);
+        });
+
+
+
         $("#logout-form").submit(function (e) {
             sessionStorage.removeItem("password");
         });
 
     };
+
+
+
+
+
+
 
     PB_Profile.init = function () {
 
@@ -67,6 +85,12 @@ $(document).ready(function () {
         });
 
     };
+
+
+
+
+
+
 
     PB_Profile.checkPublicKey = function () {
         var $this = this;
@@ -101,6 +125,12 @@ $(document).ready(function () {
             $this.checkPrivateData();
         }
     };
+
+
+
+
+
+
 
     PB_Profile.checkPrivateData = function () {
 
@@ -158,6 +188,12 @@ $(document).ready(function () {
         }
     };
 
+
+
+
+
+
+
     PB_Profile.startApp = function () {
 
         var $this = this;
@@ -177,6 +213,12 @@ $(document).ready(function () {
         });
     };
 
+
+
+
+
+
+
     PB_Profile.renderAccounts = function () {
 
         var $this = this;
@@ -194,7 +236,7 @@ $(document).ready(function () {
             $("#accounts-panel .panel-body").html("<p>Loading Account Information</p>");
 
             $.ajax({
-                url: "http://transaction.example/api/v1/accounts",
+                url: "http://localhost:8082/api/v1/accounts",
                 type: "POST",
                 crossDomain: true,
                 data: {
@@ -252,6 +294,12 @@ $(document).ready(function () {
 
     };
 
+
+
+
+
+
+
     PB_Profile.asyncCreateKeyPair = function (options) {
         var d = $.Deferred();
 
@@ -282,6 +330,11 @@ $(document).ready(function () {
         return d.promise()
     };
 
+
+
+
+
+
     PB_Profile.asyncEncrypt = function (data, public_key) {
         var d = $.Deferred();
         var openpgp = require("openpgp");
@@ -295,8 +348,30 @@ $(document).ready(function () {
         return d.promise();
     };
 
-    PB_Profile.loginHook();
+
+
+
+
+
+
+
+    PB_Profile.authHook();
     if ($("#accounts-panel").length !== 0) {
         PB_Profile.init();
     }
+
+
+
+
+
+
+
+
+
+
 });
+
+
+
+
+
