@@ -11,7 +11,4 @@
 |
 */
 
-Route::get('/', function () {
-    return Redirect::to('http://profile.example');
-});
 Route::get('/data', 'DataController@index');
